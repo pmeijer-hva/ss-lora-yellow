@@ -7,33 +7,26 @@ import _thread
 from modules.lora_module import join_lora, send_lora
 from modules.bme280 import BME280, BME280_OSAMPLE_16
 import ustruct
-from modules.deepsleep import DeepSleep
-from modules.deepsleep import PIN_WAKE, TIMER_WAKE, POWER_ON_WAKE
+from modules.deepsleep import DeepSleep, PIN_WAKE, TIMER_WAKE, POWER_ON_WAKE
 
 
 # global variables
-period = 3              # update periode in seconds for measuring a sending
+# update periode in seconds for measuring a sending
+period = 3    
 ds = DeepSleep()
-
 # get the wake reason and the value of the pins during wake up
-
 wake_s = ds.get_wake_status()
-
 print(wake_s)
 
- 
-
 if wake_s['wake'] == PIN_WAKE:
-
     print("Pin wake up")
 
 elif wake_s['wake'] == TIMER_WAKE:
-
     print("Timer wake up")
 
 else:  # POWER_ON_WAKE:
-
     print("Power ON reset")
+    
 pycom.heartbeat(False)
 
 def measure_sensor():
@@ -92,13 +85,11 @@ if __name__ == "__main__":
         data = 0
         print("no lora sent!")
 
-
     print("going sleeping")
     #i2c.deinit()
     
     time.sleep(1)
-    print("second sleep")
     ds.go_to_sleep(10)
-    print("after second sleep")
+
 
   
