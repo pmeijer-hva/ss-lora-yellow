@@ -1,11 +1,11 @@
 import machine
 from machine import I2C, Pin, ADC
-from modules import dht_module
+from modules.dht_module import device
 import time
 import pycom
 import _thread
 from modules.lora_module import join_lora, send_lora
-from modules.bme280 import BME280, BME280_OSAMPLE_16
+#from modules.bme280 import BME280, BME280_OSAMPLE_16
 import ustruct
 from modules.deepsleep import DeepSleep, PIN_WAKE, TIMER_WAKE, POWER_ON_WAKE
 
@@ -31,18 +31,27 @@ pycom.heartbeat(False)
 
 def measure_sensor():
     global payload
-    temp = bme.temperature
-    hum = bme.humidity
-    press = bme.pressure
-    print(" [+] Temp: " + temp + ", Pressure: " + press + ", Humidity: " + hum)
+    dht = device(machine.Pin.exp_board.G22)
+    
+    if dht.trigger() == True:
+        temp = dht.temperature
+        hum = dht.humidity
+    else:
+        print("sensor values could not be read dht trigger is false")
+    
+    print(" [+] Temp: " + str(temp) + ", Humidity: " + str(hum))
+
     hum = int(float(hum) * 10)                 # 2 Bytes
     temp = int(float(temp)*10) + 400           # max -40°, use it as offset
-    press = int(float(press) * 10)            # 300 to 1100 hPa with 2 digits after the point
+
+    print("humidity" , hum)
+    print("temparature", temp)
     
     #No sensors attached:
     light = 0
     windspeed = 0
     winddirection = 0
+    press = 0
 
     print(" [***] temp: ", temp, "hum: ", hum, "press: ", press, "light:", light, "windspeed:", windspeed, "winddirection: ", winddirection)
 
@@ -56,18 +65,6 @@ if __name__ == "__main__":
     print("starting main yellow nr3")
     time.sleep(1)
 
-    # light sensor init
-    adc = ADC()             # create an ADC object for the light sensor
-    apin_lightsensor = adc.channel(pin='P13', attn = ADC.ATTN_11DB)   # create an analog pin on P13, 3.3V reference, 12bit
-
-
-    # mind the pinout of the LOPY and MAKR Module 2.0
-    i2c = I2C(0, pins=('P10','P9'))     # create and use non-default PIN assignments (P10=SDA, P11=SCL)
-    i2c.init(I2C.MASTER, baudrate=20000) # init as a master
-    i2c = I2C(0, I2C.MASTER, baudrate=400000)
-    print(i2c.scan())
-    bme = BME280(i2c=i2c, mode=BME280_OSAMPLE_16)
-    
     # blocking joining lora
     sckt = join_lora()
     time.sleep(2)
