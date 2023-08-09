@@ -27,7 +27,7 @@ elif wake_s['wake'] == TIMER_WAKE:
 else:  # POWER_ON_WAKE:
     print("Power ON reset")
     
-pycom.heartbeat(False)
+pycom.heartbeat(True)
 
 def measure_sensor():
     global payload
@@ -38,14 +38,9 @@ def measure_sensor():
         hum = dht.humidity
     else:
         print("sensor values could not be read dht trigger is false")
-    
-    print(" [+] Temp: " + str(temp) + ", Humidity: " + str(hum))
 
-    hum = int(float(hum) * 10)                 # 2 Bytes
-    temp = int(float(temp)*10) + 400           # max -40°, use it as offset
-
-    print("humidity" , hum)
-    print("temparature", temp)
+    hum = int(hum * 10)                 # 2 Bytes
+    temp = int(temp*10) + 400         # max -40°, use it as offset
     
     #No sensors attached:
     light = 0
@@ -55,7 +50,7 @@ def measure_sensor():
 
     print(" [***] temp: ", temp, "hum: ", hum, "press: ", press, "light:", light, "windspeed:", windspeed, "winddirection: ", winddirection)
 
-    ht_bytes = ustruct.pack('HHHHHH', hum, temp, press, light, windspeed, winddirection)
+    ht_bytes = ustruct.pack('HHHHHH', temp, hum, press, light, windspeed, winddirection)
     print("ht_bytes:", ht_bytes)
     for i in range(len(ht_bytes)):
         payload.append(ht_bytes[i])
@@ -84,7 +79,6 @@ if __name__ == "__main__":
         print("no lora sent!")
 
     print("going sleeping")
-    #i2c.deinit()
     
     time.sleep(1)
     ds.go_to_sleep(10)
