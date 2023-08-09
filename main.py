@@ -38,8 +38,9 @@ def measure_sensor():
     hum = int(float(hum) * 10)                 # 2 Bytes
     temp = int(float(temp)*10) + 400           # max -40°, use it as offset
     press = int(float(press) * 10)            # 300 to 1100 hPa with 2 digits after the point
-    light = apin_lightsensor()               # read the analog light sensor
-  
+    
+    #No sensors attached:
+    light = 0
     windspeed = 0
     winddirection = 0
 
