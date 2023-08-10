@@ -37,15 +37,14 @@ def measure_sensor():
 
     
     if dht.trigger() == True:
-        temp = dht.temperature
-        hum = dht.humidity
+        hum = int(dht.humidity * 10)                 # 2 Bytes
+        temp = int(dht.temperature*10) + 400         # max -40°, use it as offset
     else:
         print("sensor values could not be read dht trigger is false")
         hum = -100
         temp = -100
 
-    hum = int(hum * 10)                 # 2 Bytes
-    temp = int(temp*10) + 400         # max -40°, use it as offset
+    
     
     #No sensors attached:
     windspeed = 0
