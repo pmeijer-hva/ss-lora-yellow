@@ -11,12 +11,12 @@ import modules.soundsensor as soundsensor
 
 
 # global variables
-# update periode in seconds for measuring a sending
-period = 3    
 ds = DeepSleep()
+payload = None
 # get the wake reason and the value of the pins during wake up
 wake_s = ds.get_wake_status()
 print(wake_s)
+
 
 if wake_s['wake'] == PIN_WAKE:
     print("Pin wake up")
@@ -30,9 +30,6 @@ else:  # POWER_ON_WAKE:
 
 
 def measure_sensor():
-    #todo refactor into smaller methods
-    global payload
-
     light = read_lightsensor()  
     time.sleep(1)
     sound = read_soundsensor() 
@@ -42,22 +39,22 @@ def measure_sensor():
     temp = array[1]
        
     print(" [***] temp: {} hum: {} sound: {} light: {}".format(temp,hum, sound,light))
-    
     append_payload(temp,hum,light,sound)
     
-
-
+    
 
 def read_lightsensor():
     try:
         return apin_lightsensor() 
     except:
+        print("Error no light data received")
         return 0
 
 def read_soundsensor():      
     try:
         return soundsensor.running_average(apin_soundsensor) 
     except:
+        print("Error no sound data received")
         return 0
     
 def read_humtemp_sensor():
@@ -68,9 +65,12 @@ def read_humtemp_sensor():
                 temp = int(dht.temperature*10) + 400         # max -40°, use it as offset
                 return [hum,temp]
             else:
-                print(dht.status + "sensor values could not be read, dht trigger is false") 
+                print(dht.status + "hum and temp sensor values could not be read, trying again") 
                 time.sleep(1) 
+        print("Error no hum and temp data received")
+        return [0,0]
     except:
+        print("Error no hum and temp data received")
         return [0,0]
     
     
@@ -82,14 +82,14 @@ def append_payload(temp,hum,light,sound):
      
 
 if __name__ == "__main__":
-    pycom.heartbeat(True)
     print("starting main yellow nr3")
+    pycom.heartbeat(True)
+    
     time.sleep(1)
     
     adc = ADC()             # create an ADC object for the light sensor
     apin_lightsensor = adc.channel(pin='P13', attn = ADC.ATTN_11DB)   # create an analog pin on P13, 3.3V reference, 12bit
     apin_soundsensor = adc.channel(pin='P15', attn = machine.ADC.ATTN_11DB)   # create an analog pin on P13
-
     dht = device(machine.Pin.exp_board.G22)
 
     # blocking joining lora
@@ -97,7 +97,6 @@ if __name__ == "__main__":
     time.sleep(2)
     # global data buffer
     payload = []            # common data buffer to collect and send
-    
     # get sensor values in payload
     measure_sensor()
     time.sleep(3)
