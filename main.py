@@ -30,32 +30,33 @@ pycom.heartbeat(True)
 
 def measure_sensor():
     global payload
-    dht = device(machine.Pin.exp_board.G22)
+    
     
     #No sensors attached:
-    windspeed = 0
-    winddirection = 0
     press = 0
-    #initialize values
-    light = 0
-    temp = 0
-    hum = 0
+
+
 
     try:
         light = apin_lightsensor() 
     except:
-        light = -100 
+        light = 0
         
-    if dht.trigger() == True:
-        hum = int(dht.humidity * 10)                 # 2 Bytes
-        temp = int(dht.temperature*10) + 400         # max -40°, use it as offset
-    else:
-        print("sensor values could not be read dht trigger is false")
-        hum = -100
-        temp = -100
+    time.sleep(1)
+       
+    for _ in range(10):
+        if dht.trigger() == True:
+            hum = int(dht.humidity * 10)                 # 2 Bytes
+            temp = int(dht.temperature*10) + 400         # max -40°, use it as offset
+            break
+        else:
+            hum = 0
+            temp = 0 
+            print(dht.status + "sensor values could not be read, dht trigger is false") 
+            time.sleep(1)   
+       
 
-
-    print(" [***] temp: ", temp, "hum: ", hum, "press: ", press, "light:", light, "windspeed:", windspeed, "winddirection: ", winddirection)
+    print(" [***] temp: {} hum: {} press: {} light: {}".format(temp,hum,press,light))
 
     ht_bytes = ustruct.pack('HHHHHH', temp, hum, light, press)
     print("ht_bytes:", ht_bytes)
@@ -69,6 +70,7 @@ if __name__ == "__main__":
     
     adc = ADC()             # create an ADC object for the light sensor
     apin_lightsensor = adc.channel(pin='P13', attn = ADC.ATTN_11DB)   # create an analog pin on P13, 3.3V reference, 12bit
+    dht = device(machine.Pin.exp_board.G22)
 
     # blocking joining lora
     sckt = join_lora()
@@ -91,7 +93,7 @@ if __name__ == "__main__":
     print("going sleeping")
     
     time.sleep(1)
-    ds.go_to_sleep(60)
+    ds.go_to_sleep(10)
 
 
   
