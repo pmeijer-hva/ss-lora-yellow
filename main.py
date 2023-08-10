@@ -7,6 +7,7 @@ import _thread
 from modules.lora_module import join_lora, send_lora
 import ustruct
 from modules.deepsleep import DeepSleep, PIN_WAKE, TIMER_WAKE, POWER_ON_WAKE
+import modules.soundsensor as soundsensor
 
 
 # global variables
@@ -31,17 +32,21 @@ pycom.heartbeat(True)
 def measure_sensor():
     global payload
     
-    
     #No sensors attached:
     press = 0
-
-
 
     try:
         light = apin_lightsensor() 
     except:
         light = 0
         
+    time.sleep(1)
+    
+    try:
+        sound = soundsensor.running_average(apin_soundsensor) 
+    except:
+        sound = 0
+    
     time.sleep(1)
        
     for _ in range(10):
@@ -56,9 +61,13 @@ def measure_sensor():
             time.sleep(1)   
        
 
-    print(" [***] temp: {} hum: {} press: {} light: {}".format(temp,hum,press,light))
+    print(" [***] temp: {} hum: {} sound: {} light: {}".format(temp,hum, sound,light))
+    
+    
+    print("sound {}".format(soundsensor.running_average(apin_soundsensor)))
+    
 
-    ht_bytes = ustruct.pack('HHHHHH', temp, hum, light, press)
+    ht_bytes = ustruct.pack('HHHHHH', temp, hum, light, sound)
     print("ht_bytes:", ht_bytes)
     for i in range(len(ht_bytes)):
         payload.append(ht_bytes[i])
@@ -70,6 +79,8 @@ if __name__ == "__main__":
     
     adc = ADC()             # create an ADC object for the light sensor
     apin_lightsensor = adc.channel(pin='P13', attn = ADC.ATTN_11DB)   # create an analog pin on P13, 3.3V reference, 12bit
+    apin_soundsensor = adc.channel(pin='P15', attn = machine.ADC.ATTN_11DB)   # create an analog pin on P13
+
     dht = device(machine.Pin.exp_board.G22)
 
     # blocking joining lora
