@@ -32,10 +32,20 @@ def measure_sensor():
     global payload
     dht = device(machine.Pin.exp_board.G22)
     
+    #No sensors attached:
+    windspeed = 0
+    winddirection = 0
+    press = 0
+    #initialize values
+    light = 0
+    temp = 0
+    hum = 0
 
-    light = apin_lightsensor()
-
-    
+    try:
+        light = apin_lightsensor() 
+    except:
+        light = -100 
+        
     if dht.trigger() == True:
         hum = int(dht.humidity * 10)                 # 2 Bytes
         temp = int(dht.temperature*10) + 400         # max -40°, use it as offset
@@ -44,12 +54,6 @@ def measure_sensor():
         hum = -100
         temp = -100
 
-    
-    
-    #No sensors attached:
-    windspeed = 0
-    winddirection = 0
-    press = 0
 
     print(" [***] temp: ", temp, "hum: ", hum, "press: ", press, "light:", light, "windspeed:", windspeed, "winddirection: ", winddirection)
 
@@ -87,7 +91,7 @@ if __name__ == "__main__":
     print("going sleeping")
     
     time.sleep(1)
-    ds.go_to_sleep(10)
+    ds.go_to_sleep(60)
 
 
   
