@@ -27,53 +27,62 @@ elif wake_s['wake'] == TIMER_WAKE:
 else:  # POWER_ON_WAKE:
     print("Power ON reset")
     
-pycom.heartbeat(True)
+
 
 def measure_sensor():
+    #todo refactor into smaller methods
     global payload
-    
-    #No sensors attached:
-    press = 0
 
-    try:
-        light = apin_lightsensor() 
-    except:
-        light = 0
-        
+    light = read_lightsensor()  
     time.sleep(1)
-    
-    try:
-        sound = soundsensor.running_average(apin_soundsensor) 
-    except:
-        sound = 0
-    
+    sound = read_soundsensor() 
     time.sleep(1)
+    array = read_humtemp_sensor()
+    hum = array[0]
+    temp = array[1]
        
-    for _ in range(10):
-        if dht.trigger() == True:
-            hum = int(dht.humidity * 10)                 # 2 Bytes
-            temp = int(dht.temperature*10) + 400         # max -40°, use it as offset
-            break
-        else:
-            hum = 0
-            temp = 0 
-            print(dht.status + "sensor values could not be read, dht trigger is false") 
-            time.sleep(1)   
-       
-
     print(" [***] temp: {} hum: {} sound: {} light: {}".format(temp,hum, sound,light))
     
-    
-    print("sound {}".format(soundsensor.running_average(apin_soundsensor)))
+    append_payload(temp,hum,light,sound)
     
 
+
+
+def read_lightsensor():
+    try:
+        return apin_lightsensor() 
+    except:
+        return 0
+
+def read_soundsensor():      
+    try:
+        return soundsensor.running_average(apin_soundsensor) 
+    except:
+        return 0
+    
+def read_humtemp_sensor():
+    try:
+        for _ in range(10):
+            if dht.trigger() == True:
+                hum = int(dht.humidity * 10)                 # 2 Bytes
+                temp = int(dht.temperature*10) + 400         # max -40°, use it as offset
+                return [hum,temp]
+            else:
+                print(dht.status + "sensor values could not be read, dht trigger is false") 
+                time.sleep(1) 
+    except:
+        return [0,0]
+    
+    
+def append_payload(temp,hum,light,sound):
     ht_bytes = ustruct.pack('HHHHHH', temp, hum, light, sound)
     print("ht_bytes:", ht_bytes)
     for i in range(len(ht_bytes)):
         payload.append(ht_bytes[i])
-
+     
 
 if __name__ == "__main__":
+    pycom.heartbeat(True)
     print("starting main yellow nr3")
     time.sleep(1)
     
@@ -104,7 +113,7 @@ if __name__ == "__main__":
     print("going sleeping")
     
     time.sleep(1)
-    ds.go_to_sleep(10)
+    ds.go_to_sleep(60)
 
 
   
