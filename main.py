@@ -5,7 +5,6 @@ import time
 import pycom
 import _thread
 from modules.lora_module import join_lora, send_lora
-#from modules.bme280 import BME280, BME280_OSAMPLE_16
 import ustruct
 from modules.deepsleep import DeepSleep, PIN_WAKE, TIMER_WAKE, POWER_ON_WAKE
 
@@ -50,7 +49,7 @@ def measure_sensor():
 
     print(" [***] temp: ", temp, "hum: ", hum, "press: ", press, "light:", light, "windspeed:", windspeed, "winddirection: ", winddirection)
 
-    ht_bytes = ustruct.pack('HHHHHH', temp, hum, press, light, windspeed, winddirection)
+    ht_bytes = ustruct.pack('HHHHHH', temp, hum, press, light)
     print("ht_bytes:", ht_bytes)
     for i in range(len(ht_bytes)):
         payload.append(ht_bytes[i])
