@@ -32,24 +32,29 @@ def measure_sensor():
     global payload
     dht = device(machine.Pin.exp_board.G22)
     
+
+    light = apin_lightsensor()
+
+    
     if dht.trigger() == True:
         temp = dht.temperature
         hum = dht.humidity
     else:
         print("sensor values could not be read dht trigger is false")
+        hum = -100
+        temp = -100
 
     hum = int(hum * 10)                 # 2 Bytes
     temp = int(temp*10) + 400         # max -40°, use it as offset
     
     #No sensors attached:
-    light = 0
     windspeed = 0
     winddirection = 0
     press = 0
 
     print(" [***] temp: ", temp, "hum: ", hum, "press: ", press, "light:", light, "windspeed:", windspeed, "winddirection: ", winddirection)
 
-    ht_bytes = ustruct.pack('HHHHHH', temp, hum, press, light)
+    ht_bytes = ustruct.pack('HHHHHH', temp, hum, light, press)
     print("ht_bytes:", ht_bytes)
     for i in range(len(ht_bytes)):
         payload.append(ht_bytes[i])
@@ -58,6 +63,9 @@ def measure_sensor():
 if __name__ == "__main__":
     print("starting main yellow nr3")
     time.sleep(1)
+    
+    adc = ADC()             # create an ADC object for the light sensor
+    apin_lightsensor = adc.channel(pin='P13', attn = ADC.ATTN_11DB)   # create an analog pin on P13, 3.3V reference, 12bit
 
     # blocking joining lora
     sckt = join_lora()
