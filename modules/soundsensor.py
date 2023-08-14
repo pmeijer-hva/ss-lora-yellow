@@ -7,7 +7,8 @@ import time
 
 # global variables
 queue = []          # queue to store the sound values
-nbr_val = 3        # length of the queue
+nbr_val = 10        # length of the queue
+numberOfPeaks = 3   # To eliminate 0 values we take just the peaks to calculate the avg
 periode = 1         # time in seconds between the sound measures
 
 
@@ -27,8 +28,10 @@ def running_average(apin_soundsensor) -> int:
         time.sleep(0.1)             # capture the filling with this time periode
     queue.pop(0)                    # remove the oldest value
     queue.append(apin_soundsensor()) # add the newest value to the queue
-    print(queue)
-    return mean(queue)
+    queue.sort()
+    maxList = queue[-numberOfPeaks:]
+    print(maxList)
+    return mean(maxList)
 
 
 

@@ -89,7 +89,7 @@ if __name__ == "__main__":
     
     adc = ADC()             # create an ADC object for the light sensor
     apin_lightsensor = adc.channel(pin='P15', attn = ADC.ATTN_11DB)   # create an analog pin on P13, 3.3V reference, 12bit
-    apin_soundsensor = adc.channel(pin='P13', attn = machine.ADC.ATTN_0DB)   # create an analog pin on P13
+    apin_soundsensor = adc.channel(pin='P13', attn = machine.ADC.ATTN_11DB)   # create an analog pin on P13
     dht = device(machine.Pin.exp_board.G22)
 
     # blocking joining lora
@@ -112,7 +112,7 @@ if __name__ == "__main__":
     print("going sleeping")
     
     time.sleep(1)
-    ds.go_to_sleep(1)
+    ds.go_to_sleep(60)
 
 
   
