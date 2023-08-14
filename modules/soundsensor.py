@@ -7,7 +7,7 @@ import time
 
 # global variables
 queue = []          # queue to store the sound values
-nbr_val = 10        # length of the queue
+nbr_val = 3        # length of the queue
 periode = 1         # time in seconds between the sound measures
 
 
@@ -36,6 +36,6 @@ if __name__ == "__main__":
     adc = machine.ADC()             # create an ADC object for the sound sensor
     apin_soundsensor = adc.channel(pin='P13', attn = machine.ADC.ATTN_11DB)   # create an analog pin on P13
     while True:
-        avg_sound = running_average()
+        avg_sound = running_average(apin_soundsensor)
         print(avg_sound)
         time.sleep(periode)
