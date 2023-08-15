@@ -45,7 +45,7 @@ def measure_sensor():
 
 def read_lightsensor():
     try:
-        return apin_lightsensor() 
+        return int(apin_lightsensor() * 10)
     except:
         print("Error no light data received")
         return 0
